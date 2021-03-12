@@ -14,9 +14,14 @@ Quick Start
 -----------
 
 ```
-$ alias tesseract='docker run --rm -v `pwd`:/work -w /work vimagick/tesseract'
-$ tesseract myscan.png out
-$ cat out.txt
+$ alias tesseract='docker run --rm -v `pwd`:/data -w /data vimagick/tesseract'
+
+$ tesseract input.png output -l eng --psm 3
+$ cat output.txt
+The (quick) [brown] {fox} jumps!
+
+$ tesseract chinese.jpg stdout -l chi_tra --psm 8 --oem 0
+學習
 ```
 
 [1]: https://github.com/tesseract-ocr/tesseract

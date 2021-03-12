@@ -1,9 +1,12 @@
-`MantisBT` is an open source issue tracker that provides
+mantisbt
+========
+
+[MantisBT][1] is an open source issue tracker that provides
 a delicate balance between simplicity and power.
 
 ## docker-compose.yml
 
-```
+```yaml
 mantisbt:
   image: vimagick/mantisbt:latest
   ports:
@@ -13,7 +16,9 @@ mantisbt:
   restart: always
 
 mysql:
-  image: mysql:latest
+  image: mysql:5.7
+  volumes:
+    - ./data:/var/lib/mysql
   environment:
     - MYSQL_ROOT_PASSWORD=root
     - MYSQL_DATABASE=bugtracker
@@ -65,3 +70,4 @@ $g_smtp_username = 'mantisbt';
 $g_smtp_password = '********';
 ```
 
+[1]: https://www.mantisbt.org/index.php

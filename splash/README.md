@@ -10,25 +10,34 @@ It's fast, lightweight and state-less which makes it easy to distribute.
 ## docker-compose.yml
 
 ```yaml
-splash:
-  image: scrapinghub/splash:3.3
-  command: --maxrss 4096 --max-timeout 300
-  ports:
-    - "8050:8050"
-  volumes:
-    - ./data/filters:/etc/splash/filters
-    - ./data/js-profiles:/etc/splash/js-profiles
-    - ./data/lua_modules:/etc/splash/lua_modules
-    - ./data/proxy-profiles:/etc/splash/proxy-profiles
-  mem_limit: 4608M
-  restart: always
+version: '3.7'
+
+services:
+
+  splash:
+    image: scrapinghub/splash:3.4
+    command: --maxrss 2048 --max-timeout 300 --disable-lua-sandbox --verbosity 1
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./data/filters:/etc/splash/filters
+      - ./data/js-profiles:/etc/splash/js-profiles
+      - ./data/lua_modules:/etc/splash/lua_modules
+      - ./data/proxy-profiles:/etc/splash/proxy-profiles
+    restart: unless-stopped
 ```
 
 ## server
 
-```
-$ cd ~/fig/splash
+File: data/filters/default.txt
 
+```
+||fonts.googleapis.com^
+||ajax.googleapis.com^
+```
+
+```bash
+$ cd ~/fig/splash
 $ tree
 .
 ├── docker-compose.yml
@@ -37,13 +46,14 @@ $ tree
     │   ├── easylist.txt
     │   └── default.txt
     ├── js-profiles
+    ├── lua_modules
+    │   └── utils.lua
     └── proxy-profiles
-
-$ cat data/filters/default.txt
-||fonts.googleapis.com^
-||ajax.googleapis.com^
-
 $ docker-compose up -d
+$ docker-compose ps
+      Name                    Command               State           Ports
+----------------------------------------------------------------------------------
+splash_splash_1    python3 /app/bin/splash -- ...   Up      8050/tcp
 ```
 
 > If `default.txt` file is present in `--filters-path` folder it is used by default

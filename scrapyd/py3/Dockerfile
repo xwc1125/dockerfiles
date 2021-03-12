@@ -2,8 +2,12 @@
 # Dockerfile for scrapyd:py3
 #
 
-FROM debian:stretch
-MAINTAINER kev <noreply@easypi.pro>
+FROM debian:buster
+MAINTAINER EasyPi Software Foundation
+
+ENV SCRAPY_VERSION=2.4.1
+ENV SCRAPYD_VERSION=1.2.1
+ENV PILLOW_VERSION=8.1.0
 
 RUN set -xe \
     && apt-get update \
@@ -20,6 +24,7 @@ RUN set -xe \
                           libxslt1-dev \
                           python3 \
                           python3-dev \
+                          python3-distutils \
                           vim-tiny \
     && apt-get install -y libtiff5 \
                           libtiff5-dev \
@@ -33,16 +38,17 @@ RUN set -xe \
                           zlib1g \
                           zlib1g-dev \
     && curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 \
-    && pip install git+https://github.com/scrapy/scrapy.git \
-                   git+https://github.com/scrapy/scrapyd.git \
+    && pip install git+https://github.com/scrapy/scrapy.git@$SCRAPY_VERSION \
+                   git+https://github.com/scrapy/scrapyd.git@$SCRAPYD_VERSION \
                    git+https://github.com/scrapy/scrapyd-client.git \
                    git+https://github.com/scrapinghub/scrapy-splash.git \
                    git+https://github.com/scrapinghub/scrapyrt.git \
-                   git+https://github.com/python-pillow/Pillow.git \
+                   git+https://github.com/python-pillow/Pillow.git@$PILLOW_VERSION \
     && curl -sSL https://github.com/scrapy/scrapy/raw/master/extras/scrapy_bash_completion -o /etc/bash_completion.d/scrapy_bash_completion \
     && echo 'source /etc/bash_completion.d/scrapy_bash_completion' >> /root/.bashrc \
     && apt-get purge -y --auto-remove autoconf \
                                       build-essential \
+                                      curl \
                                       libffi-dev \
                                       libssl-dev \
                                       libtool \
@@ -61,4 +67,4 @@ COPY ./scrapyd.conf /etc/scrapyd/
 VOLUME /etc/scrapyd/ /var/lib/scrapyd/
 EXPOSE 6800
 
-CMD ["scrapyd"]
+CMD ["scrapyd", "--pidfile="]

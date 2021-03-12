@@ -4,6 +4,7 @@ ELK
 - Elasticsearch
 - Logstash
 - Kibana
+- APM Server
 
 ## How it works
 
@@ -18,6 +19,18 @@ $ vi /etc/sysctl.conf
 $ chown -R 1000:1000 data
 $ docker-compose up -d
 ```
+
+## Docker Config
+
+- https://github.com/elastic/dockerfiles
+- https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+- https://www.elastic.co/guide/en/logstash/current/docker-config.html
+- https://www.elastic.co/guide/en/kibana/current/docker.html
+
+## Logstash Config
+
+- https://www.elastic.co/guide/en/logstash/current/configuration-file-structure.html
+- https://www.elastic.co/guide/en/logstash/current/event-dependent-configuration.html
 
 ## Delete indices older than 7 days
 

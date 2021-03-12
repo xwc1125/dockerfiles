@@ -3,82 +3,71 @@ urlwatch
 
 [urlwatch][1] is a tool for monitoring webpages for updates.
 
-```
-cron: triggered every 15 minutes
-    -> make: generate urls.txt from urls.yml
-        -> urlwatch: fetch webpages
-            -> hooks.py: extract info
-                -> email: send via smtp
-                    -> (^_^)
-```
-
 ## docker-compose.yml
 
-```
+```yaml
 urlwatch:
   image: vimagick/urlwatch
   volumes:
-    - urlwatch/Makefile:/root/.urlwatch/Makefile
-    - urlwatch/urls.yml:/root/.urlwatch/urls.yml
-  restart: always
+    - ./data:/root/.urlwatch
+  restart: unless-stopped
 ```
 
-## Makefile
+## urls.yaml
+
+```yaml
+---
+
+url: "https://github.com/thp/urlwatch/releases/latest"
+filter:
+- xpath: '(//div[contains(@class,"release-timeline-tags")]//h4)[1]/a'
+- html2text: re
+
+---
+
+url: "https://github.com/shadowsocks/shadowsocks-libev/releases/latest"
+filter:
+- css: 'div.f1>a'
+- html2text: re
+
+...
+```
+
+## up and running
+
+```bash
+$ docker-compose up -d
+$ docker-compose exec urlwatch sh
+>>> urlwatch --test-slack
+Successfully sent message to Slack
+>>> urlwatch --list
+1: https://github.com/thp/urlwatch/releases/latest
+2: https://github.com/shadowsocks/shadowsocks-libev/releases/latest
+>>> urlwatch --test-filter 2
+v3.2.5
+>>> exit
+```
+
+[1]: https://thp.io/2008/urlwatch/
+
+## customizing cron schedule
+
+### Create a crontab file
 
 ```
-SHELL = /bin/sh
-PATH := /usr/local/bin:$(PATH)
-
-SMTP = smtp.easypi.info:587
-FROM = urlwatch@easypi.info
-PASS = password
-TO = noreply@easypi.info
-
-all: setup urls.txt
-	urlwatch -s $(SMTP) -f $(FROM) -t $(TO) -A -T
-
-urls.txt: urls.yml
-	python lib/hooks.py
-
-setup:
-	python -c 'import keyring; keyring.set_password("$(SMTP)", "$(FROM)", "$(PASS)")'
+*/30 * * * * cd /root/.urlwatch && urlwatch --urls urls.yaml --config urlwatch.yaml --hooks hooks.py --cache cache.db
+*/15 * * * * cd /root/.urlwatch && urlwatch --urls urls-every-15m.yaml --config urlwatch.yaml --hooks hooks.py --cache cache.db
 ```
 
-> Please change `STMP`/`FROM`/`PASS`/`TO` to correct value.
+See the [crontab manpage for details on format](https://man7.org/linux/man-pages/man5/crontab.5.html#DESCRIPTION).
 
-## urls.yml
+### Mount the crontab file as a docker volume
 
-```
-python:
-  url: https://www.python.org/downloads/
-  exp: //div[@class="download-unknown"]/p[@class]/a[1]/text()
-
-ubuntu:
-  url: http://www.ubuntu.com/download/server
-  exp: //div[contains(@class, "row-hero")]//h2/text()
-
-coreos:
-  url: https://coreos.com
-  exp: //div[@class="co-p-homepage-release-text"]/text()
-
+```yaml
 urlwatch:
-  url: https://github.com/thp/urlwatch/releases
-  exp: //ul[@class="release-timeline-tags"]/li[1]//span[@class="tag-name"]/text()
+  image: vimagick/urlwatch
+  volumes:
+    - ./data:/root/.urlwatch
+    - ./data/crontab:/etc/crontabs/root
+  restart: unless-stopped
 ```
-
-## Email alert
-
-```
-***************************************************************************
-CHANGED: https://coreos.com#coreos
-***************************************************************************
---- @   Tue, 07 Jul 2015 17:15:01 +0000
-+++ @   Tue, 07 Jul 2015 20:00:01 +0000
-@@ -1 +1 @@
--coreos: 723.1.0
-+coreos: 735.0.0
-
-***************************************************************************
-```
-
-[1]: thp.io/2008/urlwatch/

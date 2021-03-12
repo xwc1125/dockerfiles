@@ -1,6 +1,7 @@
-urlwatch:
-  image: vimagick/urlwatch
-  volumes:
-    - ./urlwatch/Makefile:/root/.urlwatch/Makefile
-    - ./urlwatch/urls.yml:/root/.urlwatch/urls.yml
-  restart: always
+services:
+  urlwatch:
+    image: vimagick/urlwatch
+    volumes:
+      - ./data:/root/.urlwatch
+      - ./data/crontab:/etc/crontabs/root
+    restart: unless-stopped

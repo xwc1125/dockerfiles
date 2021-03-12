@@ -2,8 +2,8 @@
 # Dockerfile for hubot
 #
 
-FROM alpine
-MAINTAINER kev <noreply@easypi.pro>
+FROM alpine:3
+MAINTAINER EasyPi Software Foundation
 
 ENV HUBOT_NAME=Hubot
 ENV HUBOT_ADAPTER=slack
@@ -11,7 +11,7 @@ ENV HUBOT_DESCRIPTION=$HUBOT_NAME-$HUBOT_ADAPTER
 ENV HUBOT_SLACK_TOKEN=
 
 RUN set -xe \
-    && apk add --update ca-certificates nodejs nodejs-npm \
+    && apk add --update ca-certificates nodejs nodejs-npm python3 \
     && npm install -g yo generator-hubot \
     && adduser -s /bin/sh -D hubot
 
@@ -33,7 +33,10 @@ RUN set -xe \
                           url \
     && sed -i -r 's/^\s+#//' scripts/example.coffee
 
-VOLUME /home/hobot
+VOLUME /home/hobot \
+       /usr/local/bin \
+       /usr/lib/python3.8/site-packages
+
 EXPOSE 8080
 
 CMD ["./bin/hubot", "--adapter", "slack"]

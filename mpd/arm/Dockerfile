@@ -2,11 +2,13 @@
 # Dockerfile for mpd-arm
 #
 
-FROM easypi/alpine-arm
+FROM arm32v7/alpine:3.12
 MAINTAINER EasyPi Software Foundation
 
-RUN apk add --no-cache mpd mpc
-COPY mpd.conf /etc/mpd.conf
+RUN set -xe \
+    && apk add --no-cache mpd mpc ncmpc \
+    && setcap -r /usr/bin/mpd
+
 VOLUME /var/lib/mpd
 
 EXPOSE 6600
